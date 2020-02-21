@@ -8,6 +8,7 @@ import { tap } from 'rxjs/operators';
 import { TimeoutError } from 'rxjs';
 import {SelectionModel} from '@angular/cdk/collections';
 
+
 @Component({
   selector: 'app-customers',
   templateUrl: './customers.component.html',
@@ -21,11 +22,26 @@ export class CustomersComponent implements AfterViewInit, OnInit {
   displayedColumns = ['select', 'id', 'name', 'surname'];
   selection = new SelectionModel<CustomersItem>(true, []);
 
+  showRowActions: boolean = false;
+
   /** Whether the number of selected elements matches the total number of rows. */
   isAllSelected() {
     const numSelected = this.selection.selected.length;
     const numRows = this.dataSource.data.length;
     return numSelected === numRows;
+  }
+
+  isAnySelected() {
+    return (this.selection.selected.length > 0);
+  }
+
+  checkboxChanged() {
+    if(this.isAnySelected())
+      console.log("da");
+    else
+      console.log("ne");
+
+      this.showRowActions = this.isAnySelected();
   }
 
   /** Selects all rows if they are not all selected; otherwise clear selection. */
