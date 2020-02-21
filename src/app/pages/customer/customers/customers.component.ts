@@ -1,9 +1,11 @@
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { MatTable } from '@angular/material/table';
+import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { CustomersDataSource, CustomersItem } from './customers-datasource';
-import { CustomerService } from '../customer.service';
+import { CustomerService, Customer } from '../customer.service';
+import { tap } from 'rxjs/operators';
+import { TimeoutError } from 'rxjs';
 
 @Component({
   selector: 'app-customers',
@@ -13,20 +15,29 @@ import { CustomerService } from '../customer.service';
 export class CustomersComponent implements AfterViewInit, OnInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
-  @ViewChild(MatTable) table: MatTable<CustomersItem>;
-  dataSource: CustomersDataSource;
+  // @ViewChild(MatTable) table: MatTable<CustomersItem>;
+  dataSource: MatTableDataSource<Customer> = new MatTableDataSource();
 
   /** Columns displayed in the table. Columns IDs can be added, removed, or reordered. test */
   displayedColumns = ['id', 'name', 'surname'];
 
-  constructor(private ccS: CustomerService) { }
+  constructor(private ccS: CustomerService) {
+    // this.dataSource.filterPredicate = this.myFilter;
+  }
   ngOnInit() {
-    this.dataSource = new CustomersDataSource(this.ccS);
+
   }
 
   ngAfterViewInit() {
     this.dataSource.sort = this.sort;
     this.dataSource.paginator = this.paginator;
-    this.table.dataSource = this.dataSource;
+    this.ccS.getCustomers().pipe(
+      tap(data => this.dataSource.data = data)
+    ).subscribe()
+    // // this.table.dataSource = this.dataSource;
+  }
+
+  private myFilter(data: Customer, filter: string): boolean {
+    return true;
   }
 }
